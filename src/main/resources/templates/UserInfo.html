@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <style>
+        /* 自定义样式 */
+        .ui.segment, .ui.header, .ui.vertical.menu, .ui.segment {
+            font-size: 1.5em; /* 增加字体大小 */
+            padding: 20px; /* 增加填充 */
+        }
+
+        .ui.header {
+            background-color: #607D8B; /* 蓝灰色背景颜色 */
+            color: white; /* 文本颜色 */
+            padding: 15px; /* 调整填充 */
+        }
+
+        .ui.grid {
+            margin-top: 20px; /* 增加栅格的上边距 */
+        }
+
+        .ui.container {
+            max-width: 1200px; /* 限制容器宽度 */
+        }
+    </style>
+    <title>HG网后台人员管理系统</title>
+</head>
+<body>
+<div class="ui container">
+    <!-- 标题栏 -->
+    <div class="ui segment">
+        <h2 class="ui header">HG网——后台管理系统</h2>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="ui grid">
+        <!-- 侧边栏 / 导航 -->
+        <div class="four wide column">
+            <div class="ui vertical menu">
+                <a class="item" href="#" onclick="loadContent('Announcements')">
+                    <i class="bullhorn icon"></i> 公告
+                </a>
+                <a class="item" href="#" onclick="loadContent('Goods')">
+                    <i class="home icon"></i> 商品信息管理
+                </a>
+                <a class="item" href="#" onclick="loadContent('Orders')">
+                    <i class="block layout icon"></i> 订单信息
+                </a>
+                <a class="item" href="#" onclick="loadContent('Users')">
+                    <i class="mail icon"></i> 用户信息
+                </a>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="twelve wide column">
+            <div class="ui segment" id="contentArea">
+                <button class="ui button" onclick="toggleModal('addUserFormModal')">添加用户信息</button>
+                <button class="ui button" onclick="toggleModal('deleteUserFormModal')">删除用户信息</button>
+                <button class="ui button" onclick="toggleModal('updateUserFormModal')">修改用户信息</button>
+                <!-- 这里是动态显示的内容 -->
+                <h3 class="ui header">用户信息</h3>
+                <table class="ui celled table">
+                    <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>密码</th>
+                        <th>激活状态</th>
+                    </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                    <!-- 列表内容在此处动态展示 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 添加用户信息表单模态框 -->
+        <div class="ui modal" id="addUserFormModal">
+            <div class="header">添加用户信息</div>
+            <div class="content">
+                <!-- 添加用户信息表单 -->
+                <div class="ui form">
+                    <div class="field">
+                        <label>用户名/邮箱</label>
+                        <input type="text" id="emailInput" placeholder="Email">
+                    </div>
+                    <div class="field">
+                        <label>密码</label>
+                        <input type="password" id="passwordInput" placeholder="Password">
+                    </div>
+                    <div class="field">
+                        <label>激活状态信息</label>
+                        <input type="text" id="statusInput" placeholder="激活状态信息">
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="ui button" id="addUser">提交</button>
+            </div>
+        </div>
+
+        <!-- 删除用户信息表单模态框 -->
+        <div class="ui modal" id="deleteUserFormModal">
+            <div class="header">删除用户信息</div>
+            <div class="content">
+                <!-- 删除用户信息表单 -->
+                <div class="ui form">
+                    <div class="field">
+                        <label>用户名/邮箱</label>
+                        <input type="text" id="emailInputToDelete" placeholder="Email">
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="ui button" id="deleteUser">提交</button>
+            </div>
+        </div>
+
+        <!-- 修改用户信息表单模态框 -->
+        <div class="ui modal" id="updateUserFormModal">
+            <div class="header">修改用户信息</div>
+            <div class="content">
+                <!-- 修改用户信息表单 -->
+                <div class="ui form">
+                    <div class="field">
+                        <label>用户名/邮箱</label>
+                        <input type="text" id="emailInputToUpdate" placeholder="Email">
+                    </div>
+                    <div class="field">
+                        <label>密码</label>
+                        <input type="password" id="passwordInputToUpdate" placeholder="Password">
+                    </div>
+                    <div class="field">
+                        <label>激活状态信息</label>
+                        <input type="text" id="statusInputToUpdate" placeholder="激活状态信息">
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="ui button" id="updateUser">提交</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+    // 加载数据库中的用户信息并展示到对应区域
+    $.ajax({
+        url: `/admin/Users`,
+        method: 'POST',
+        success: function(data) {
+            // Update content area with the retrieved data
+            $('#userTableBody').empty(); // Clear previous data
+            data.forEach(function (user){
+                $('#userTableBody').append(`
+                        <tr>
+                            <td
+                            <td>${user.email}</td>
+                            <td>${user.password}</td>
+                            <td>${user.isValid}</td>
+                        </tr>
+                    `);
+            });
+        },
+        error: function(error) {
+            console.error('Error fetching data:', error);
+        }
+    });
+    // 弹出对应表单
+    function toggleModal(modalId) {
+        $('#' + modalId).modal('show');
+    }
+    // 跳转页面
+    function loadContent(section) {
+        if (section === 'Users') {
+            window.location.href = '/UserInfo';
+        }
+        else if (section === 'Goods'){
+            window.location.href = '/GoodsInfo'
+        }
+        else if (section === 'Orders'){
+            window.location.href = '/OrderInfo'
+        }
+        else if (section === 'Announcement'){
+            window.location.href = '/adminWeb'
+        }
+    }
+
+    // 添加用户
+    $("#addUser").on("click", function (){
+        $.ajax({
+            url:"/admin/add",
+            type:"POST",
+            data:{
+                email: $("#emailInput").val(),
+                password: $("#passwordInput").val(),
+                isValid: $("#statusInput").val()
+            },
+            resultType:"json",
+            success: function (result){
+                alert(result.message);
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        });
+    });
+    // 删除用户
+    $("#deleteUser").on("click", function (){
+        $.ajax({
+            url:"admin/delete",
+            type:"POST",
+            data:{
+                email: $("#emailInputToDelete").val(),
+            },
+            resultType:"json",
+            success: function (result){
+                alert(result.message);
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        });
+    });
+    // 修改用户
+    $("#updateUser").on("click", function (){
+        $.ajax({
+            url:"admin/update",
+            type:"POST",
+            data:{
+                email: $("#emailInputToUpdate").val(),
+                password: $("#passwordInputToUpdate").val(),
+                isValid: $("#statusInputToUpdate").val(),
+            },
+            resultType:"json",
+            success: function (result){
+                alert(result.message);
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        });
+    });
+</script>
+</body>
+</html>

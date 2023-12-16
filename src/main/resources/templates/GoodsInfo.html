@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <style>
+        /* 自定义样式 */
+        .ui.celled.table, .ui.header, .ui.vertical.menu{
+            font-size: 1.5em; /* 增加字体大小 */
+            padding: 20px; /* 增加填充 */
+        }
+
+        .ui.header {
+            background-color: #607D8B; /* 蓝灰色背景颜色 */
+            color: white; /* 文本颜色 */
+            padding: 15px; /* 调整填充 */
+        }
+
+        .ui.grid {
+            margin-top: 20px; /* 增加栅格的上边距 */
+        }
+
+        .ui.container {
+            max-width: 1200px; /* 限制容器宽度 */
+        }
+
+    </style>
+    <title>HG网后台人员管理系统</title>
+</head>
+<body>
+<div class="ui container">
+    <!-- 标题栏 -->
+    <div class="ui segment">
+        <h2 class="ui header">HG网——后台管理系统</h2>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="ui grid">
+        <!-- 侧边栏 / 导航 -->
+        <div class="four wide column">
+            <div class="ui vertical menu">
+                <a class="item" href="#" onclick="loadContent('Announcements')">
+                    <i class="bullhorn icon"></i> 公告
+                </a>
+                <a class="item" href="#" onclick="loadContent('Goods')">
+                    <i class="home icon"></i> 商品信息管理
+                </a>
+                <a class="item" href="#" onclick="loadContent('Orders')">
+                    <i class="block layout icon"></i> 订单信息
+                </a>
+                <a class="item" href="#" onclick="loadContent('Users')">
+                    <i class="mail icon"></i> 用户信息
+                </a>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="twelve wide column">
+            <div class="ui segment" id="contentArea">
+                <!-- 添加商品按钮 -->
+                <button class="ui button" onclick="showAddForm()">添加商品</button>
+
+                <!-- 商品信息表格 -->
+                <table class="ui celled table" style="font-size: 1em">
+                    <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>分类</th>
+                        <th>图像</th>
+                        <th>原价</th>
+                        <th>折扣</th>
+                        <th>最终价</th>
+                        <th>库存量</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="goodsTableBody">
+                    <!-- 列表内容在此处动态展示 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 添加商品信息的模态框 -->
+        <div class="ui modal" id="addModal">
+            <i class="close icon"></i>
+            <div class="header">
+                添加商品信息
+            </div>
+            <div class="content">
+                <!-- 添加商品信息的表单 -->
+                <form id="addForm" class="ui form">
+                    <div class="field">
+                        <label>商品名</label>
+                        <input type="text" name="title" placeholder="商品名" id="titleInputToAdd">
+                    </div>
+                    <div class="field">
+                        <label>分类</label>
+                        <input type="text" name="kind" placeholder="分类" id="kindInputToAdd">
+                    </div>
+                    <!-- 上传图片字段 -->
+                    <div class="field">
+                        <label>商品图片</label>
+                        <input type="file" name="productImage" accept="image/*" id="ImageInputToAdd">
+                    </div>
+                    <div class="field">
+                        <label>原价</label>
+                        <input type="text" name="originalPrice" placeholder="原价" id="originalPriceInputToAdd">
+                    </div>
+                    <div class="field">
+                        <label>折扣</label>
+                        <input type="text" name="discount" placeholder="折扣" id="discountInputToAdd">
+                    </div>
+                    <div class="field">
+                        <label>最终价</label>
+                        <input type="text" name="finalPrice" placeholder="最终价" id="finalPriceInputToAdd">
+                    </div>
+                    <div class="field">
+                        <label>库存量</label>
+                        <input type="text" name="num" placeholder="库存量" id="numInputToAdd">
+                    </div>
+                </form>
+            </div>
+            <div class="actions">
+                <div class="ui primary button" onclick="addGoodsInfo()">确认添加</div>
+                <div class="ui button" onclick="clearAddForm()">取消</div>
+            </div>
+        </div>
+
+        <!-- 修改商品信息表单模态框 -->
+        <div class="ui modal" id="editModal">
+            <i class="close icon"></i>
+            <div class="header">
+                编辑商品信息
+            </div>
+            <div class="content">
+                <!-- 编辑商品信息的表单 -->
+                <form id="editForm" class="ui form">
+                    <div class="field">
+                        <label>商品名</label>
+                        <input type="text" name="title" placeholder="商品名" id="titleInputToUpdate">
+                    </div>
+                    <div class="field">
+                        <label>分类</label>
+                        <input type="text" name="kind" placeholder="分类" id="kindInputToUpdate">
+                    </div>
+                    <div class="field">
+                        <label>原价</label>
+                        <input type="text" name="originalPrice" placeholder="原价" id="originalPriceInputToUpdate">
+                    </div>
+                    <div class="field">
+                        <label>折扣</label>
+                        <input type="text" name="discount" placeholder="折扣" id="discountInputToUpdate">
+                    </div>
+                    <div class="field">
+                        <label>最终价</label>
+                        <input type="text" name="finalPrice" placeholder="最终价" id="finalPriceInputToUpdate">
+                    </div>
+                    <div class="field">
+                        <label>库存量</label>
+                        <input type="text" name="num" placeholder="库存量" id="numInputToUpdate">
+                    </div>
+                </form>
+            </div>
+            <div class="actions">
+                <div class="ui primary button">确认</div>
+                <div class="ui button">取消</div>
+            </div>
+        </div>
+
+        <!-- 删除商品信息确认模态框 -->
+        <div class="ui basic modal" id="deleteModal">
+            <div class="ui icon header">
+                <i class="trash alternate outline icon"></i>
+                确认删除商品
+            </div>
+            <div class="content">
+                <p>你确定要删除该商品吗？</p>
+            </div>
+            <div class="actions">
+                <div class="ui red basic cancel inverted button">
+                    <i class="remove icon"></i>
+                    取消
+                </div>
+                <div class="ui green ok inverted button">
+                    <i class="checkmark icon"></i>
+                    确认删除
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+
+    // 跳转页面
+    function loadContent(section) {
+        if (section === 'Users') {
+            window.location.href = '/UserInfo';
+        }
+        else if (section === 'Goods'){
+            window.location.href = '/GoodsInfo'
+        }
+        else if (section === 'Orders'){
+            window.location.href = '/OrderInfo'
+        }
+        else if (section === 'Announcement'){
+            window.location.href = '/adminWeb'
+        }
+    }
+
+    // 加载数据库中的用户信息并展示到对应区域
+    $.ajax({
+        url: '/goods/Goods',
+        method: 'POST',
+        success: function(data) {
+            // 使用数据库中数据更新内容
+            $('#goodsTableBody').empty(); // 清除表格数据
+            data.forEach(function (goods) {
+                $('#goodsTableBody').append(`
+                        <tr>
+                            <td>${goods.title}</td>
+                            <td>${goods.kind}</td>
+                            <td><img src="${goods.img}" alt="${goods.title}" style="max-height: 50px;"></td>
+                            <td>${goods.originalPrice}</td>
+                            <td>${goods.discount}</td>
+                            <td>${goods.finalPrice}</td>
+                            <td>${goods.num}</td>
+                            <td>
+                                <button class="ui button" onclick="showEditForm(${goods.id})">修改</button>
+                                <button class="ui button" onclick="deleteGoodsInfo(${goods.id})">删除</button>
+                            </td>
+                        </tr>
+                    `);
+            });
+        },
+        error: function(error) {
+            console.error('Error fetching data:', error);
+        }
+    });
+
+    // 显示添加商品信息的表单
+    function showAddForm(){
+        // 显示添加信息的模态框
+        $('#addModal').modal('show');
+    }
+
+    // 添加商品信息函数
+    function addGoodsInfo(){
+        // 获取上传的文件
+        var fileInput = document.getElementById('ImageInputToAdd');
+        var file = fileInput.files[0];
+        // 创建 FormData 对象
+        var formData = new FormData();
+        // 将文件添加到 FormData 中
+        formData.append('file', file);
+        // 将其他表单数据添加到 FormData 中
+        formData.append('title', $("#titleInputToAdd").val());
+        formData.append('kind', $("#kindInputToAdd").val());
+        formData.append('originalPrice', $("#originalPriceInputToAdd").val());
+        formData.append('discount', $("#discountInputToAdd").val());
+        formData.append('finalPrice', $("#finalPriceInputToAdd").val());
+        formData.append('num', $("#numInputToAdd").val());
+
+        $.ajax({
+            url:'/imgStr',
+            type:'POST',
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                alert(result.message);
+            },
+            error: function (result) {
+                alert(result.message);
+            }
+        })
+    }
+
+    // 展示对应商品的信息至表单
+    function showEditForm(goodsId){
+        // 根据商品ID执行相应的操作
+        $('#editModal').modal({
+            onVisible: function (){
+                // 模态框显示时执行
+                // 通过ajax请求获取商品信息，并填充表单
+                $.ajax({
+                    url:'/goods/Show',
+                    method: 'POST',
+                    data:{
+                        ID:goodsId
+                    },
+                    success:function(goods){
+                        // 在这里填充商品信息到表单中
+                        $('#editModal input[name="title"]').val(goods.title);
+                        $('#editModal input[name="kind"]').val(goods.kind);
+                        $('#editModal input[name="originalPrice"]').val(goods.originalPrice);
+                        $('#editModal input[name="discount"]').val(goods.discount);
+                        $('#editModal input[name="finalPrice"]').val(goods.finalPrice);
+                        $('#editModal input[name="num"]').val(goods.num);
+
+                        // 调用updateGoodsInfo时传递goods.id
+                        $('#editModal .ui.primary.button').click(function () {
+                            updateGoodsInfo(goods.id);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('获取商品信息出错:', error);
+                    }
+                })
+            }
+        }).modal('show')
+    }
+
+    // 根据商品ID更新商品信息
+    function updateGoodsInfo(goodsID){
+        $.ajax({
+            url:"/goods/Update",
+            type:"POST",
+            data:{
+                id: goodsID,
+                title: $("#titleInputToUpdate").val(),
+                kind: $("#kindInputToUpdate").val(),
+                originalPrice: $("#originalPriceInputToUpdate").val(),
+                discount: $("#discountInputToUpdate").val(),
+                finalPrice: $("#finalPriceInputToUpdate").val(),
+                num: $("#numInputToUpdate").val()
+            },
+            resultType:"json",
+            success: function (result){
+                alert(result.message);
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        });
+    }
+
+    // 删除商品信息
+    function deleteGoodsInfo(goodId) {
+        // 弹出确认删除的模态框
+        $('#deleteModal')
+            .modal({
+                closable: false,
+                onApprove: function () {
+                    // 用户点击确认删除时执行删除操作
+                    $.ajax({
+                        url: '/goods/Delete',
+                        method: 'POST',
+                        data: {
+                            id: goodId
+                        },
+                        success: function (result) {
+                            // 删除成功，刷新商品列表或执行其他操作
+                            alert(result.message);
+                            // 刷新商品列表或执行其他操作
+                        },
+                        error: function (error) {
+                            console.error('Error deleting goods information:', error);
+                        }
+                    });
+                }
+            })
+            .modal('show');
+    }
+
+
+</script>
+</body>
+</html>

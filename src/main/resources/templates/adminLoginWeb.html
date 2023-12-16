@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Your Website</title>
+    <!-- 引入 Semantic UI 的样式文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        #login-container {
+            height: 100vh;
+            display: flex;
+        }
+
+        #image-container {
+            flex: 1;
+            background-image: url('https://img.zcool.cn/community/010d085b34cd9ca80120b959be919f.jpg'); /* 替换为你的图片路径 */
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #image-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+        }
+
+        #login-form-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #image-overlay h1 {
+            font-size: 3em; /* 调整字体大小 */
+        }
+
+        .ui.card {
+            width: 500px;
+            transform: scale(1.5)
+        }
+
+        .ui.centered.grid {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-container">
+    <!-- Left side with image -->
+    <div id="image-container">
+        <div id="image-overlay">
+            <h1>欢迎来到HG电商网！</h1>
+            <!-- Add any additional content or text here -->
+        </div>
+    </div>
+
+    <!-- Right side with login and register forms -->
+    <div id="login-form-container">
+        <div class="ui centered grid">
+            <div class="ui card">
+                <div class="content">
+                    <div class="ui header">登陆账号</div>
+                </div>
+                <div class="content">
+                    <!-- Add your login form here -->
+                    <form class="ui form" onsubmit="return false;">
+                        <div class="field">
+                            <label for="username">开发者账户:</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="field">
+                            <label for="password">密码:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <button class="ui button primary" id="login">登录</button>
+                    </form>
+                </div>
+                <div class="extra content">
+                    <p><a href="/login">普通用户登录</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="UTF-8">
+    // 登录账号
+    $("#login").on("click", function (){
+        $.ajax({
+            url:"/admin/adminLogin",
+            type:"POST",
+            data:{
+                email: $("#username").val(),
+                password: $("#password").val()
+            },
+            resultType:"json",
+            success: function (result){
+                alert(result.message);
+                if(200 == result.code){
+                    window.location.href="/adminWeb";
+                }
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        });
+    });
+</script>
+<!-- 引入 Semantic UI 的脚本文件 -->
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.js"></script>
+</body>
+</html>

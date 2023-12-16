@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <style>
+        /* 自定义样式 */
+        .ui.segment, .ui.header, .ui.vertical.menu, .ui.segment {
+            font-size: 1.5em; /* 增加字体大小 */
+            padding: 20px; /* 增加填充 */
+        }
+
+        .ui.header {
+            background-color: #607D8B; /* 蓝灰色背景颜色 */
+            color: white; /* 文本颜色 */
+            padding: 15px; /* 调整填充 */
+        }
+
+        .ui.grid {
+            margin-top: 20px; /* 增加栅格的上边距 */
+        }
+
+        .ui.container {
+            max-width: 1200px; /* 限制容器宽度 */
+        }
+    </style>
+    <title>HG网后台人员管理系统</title>
+</head>
+<body>
+<div class="ui container">
+    <!-- 标题栏 -->
+    <div class="ui segment">
+        <h2 class="ui header">HG网——后台管理系统</h2>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="ui grid">
+        <!-- 侧边栏 / 导航 -->
+        <div class="four wide column">
+            <div class="ui vertical menu">
+                <a class="item" href="#" onclick="loadContent('Announcements')">
+                    <i class="bullhorn icon"></i> 首页公告
+                </a>
+                <a class="item" href="#" onclick="loadContent('Goods')">
+                    <i class="home icon"></i> 商品信息管理
+                </a>
+                <a class="item" href="#" onclick="loadContent('Orders')">
+                    <i class="block layout icon"></i> 订单信息
+                </a>
+                <a class="item" href="#" onclick="loadContent('Users')">
+                    <i class="mail icon"></i> 用户信息
+                </a>
+            </div>
+        </div>
+        <!-- 主要内容区域 -->
+        <div class="twelve wide column" id="contentArea">
+            <!-- 这里是动态显示的内容 -->
+            <h3 class="ui header">公告</h3>
+            <p>欢迎使用：HG网——后台管理系统</p>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+    function loadContent(section) {
+        if (section === 'Users') {
+            window.location.href = '/UserInfo';
+        }
+        else if (section === 'Goods'){
+            window.location.href = '/GoodsInfo'
+        }
+        else if (section === 'Orders'){
+            window.location.href = '/OrderInfo'
+        }
+        else if (section === 'Announcement'){
+            window.location.href = '/adminWeb'
+        }
+    }
+</script>
+</body>
+</html>

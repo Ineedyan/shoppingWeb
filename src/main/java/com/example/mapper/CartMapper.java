@@ -21,6 +21,7 @@ public interface CartMapper {
     @Delete("DELETE FROM cart WHERE id=#{id}")
     int deleteRecordByID(Cart cart);
 
+    // 根据用户ID删除购物车记录
     @Delete("DELETE FROM cart WHERE userID=#{userID}")
     int clearCart(Integer userID);
 }

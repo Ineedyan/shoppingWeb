@@ -19,9 +19,7 @@ public class userController {
     @Resource
     private UserService userService;
 
-    /*
-    * 注册账号
-    * */
+    // 注册账号
     @PostMapping("create")
     public Map<String,Object> createAccount(User user){
         return userService.createAccount(user);

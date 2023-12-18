@@ -30,7 +30,7 @@ public interface GoodsMapper {
     /*
     * 更改商品信息
     * */
-    @Update("UPDATE goods SET title=#{title}, kind=#{kind}, originalPrice=#{originalPrice}, discount=#{discount}, originalPrice=#{originalPrice}, num=#{num} WHERE id=#{id} ")
+    @Update("UPDATE goods SET title=#{title}, kind=#{kind}, originalPrice=#{originalPrice}, discount=#{discount}, finalPrice=#{finalPrice}, num=#{num} WHERE id=#{id} ")
     int updateGoodsInfo(Product product);
 
     /*

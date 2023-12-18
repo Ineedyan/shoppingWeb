@@ -209,7 +209,7 @@
         else if (section === 'Orders'){
             window.location.href = '/OrderInfo'
         }
-        else if (section === 'Announcement'){
+        else if (section === 'Announcements'){
             window.location.href = '/adminWeb'
         }
     }
@@ -252,7 +252,7 @@
 
     // 添加商品信息函数
     function addGoodsInfo(){
-        // 获取上传的文件
+        // 获取上传的图片文件
         var fileInput = document.getElementById('ImageInputToAdd');
         var file = fileInput.files[0];
         // 创建 FormData 对象

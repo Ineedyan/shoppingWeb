@@ -37,6 +37,9 @@ public interface AdminMapper {
     @Delete("DELETE FROM user WHERE email = #{email}")
     int deleteUser(User user);
 
+    /*
+        修改账号信息
+    */
     @Update("UPDATE user SET password = #{password}, is_valid = #{isValid} WHERE email = #{email}")
     int updateUser(User user);
 

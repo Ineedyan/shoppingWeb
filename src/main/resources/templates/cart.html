@@ -207,6 +207,7 @@
         url:"address/getInfo",
         method:"POST",
         success: function (addresses){
+            // 将收货地址信息绑定到地址选择框上
             var addressDropdown = $("#addressDropdown");
             addressDropdown.empty();
             addresses.forEach(function (address) {

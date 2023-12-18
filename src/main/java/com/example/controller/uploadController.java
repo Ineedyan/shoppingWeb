@@ -24,7 +24,7 @@ public class uploadController {
     @RequestMapping("imgStr")
     public Map<String, Object> ImgStr(@RequestParam("file") MultipartFile file, Product product)throws IOException {
         Map<String, Object> resultMap = new HashMap<>();
-        //我们简单验证一下file文件是否为空
+        //简单验证一下file文件是否为空
         if (file.isEmpty()){
             resultMap.put("code", 400);
             resultMap.put("message","上传失败！");
@@ -49,7 +49,6 @@ public class uploadController {
         //保存图片
         file.transferTo(new File(casePath+"/"+name));
         //拼接要保存在数据中的图片地址
-        //path.getUREIMG() 同样也是存放在实体类的字段 可以直接写 http://localhost:8080/
         //dateForm 这是动态的文件夹所以要和地址一起存入数据库中
         String urlImg = "/img/"+dateForm+"/"+name;
         //放入对应的字段中

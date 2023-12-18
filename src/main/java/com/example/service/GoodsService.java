@@ -1,6 +1,5 @@
 package com.example.service;
 
-import com.example.mapper.AdminMapper;
 import com.example.mapper.GoodsMapper;
 import com.example.pojo.Product;
 import jakarta.annotation.Resource;
@@ -12,8 +11,6 @@ import java.util.Map;
 
 @Service
 public class GoodsService {
-    @Resource
-    private AdminMapper adminMapper;
 
     @Resource
     private GoodsMapper goodsMapper;

@@ -33,6 +33,7 @@ public interface AddressMapper {
             "FROM address WHERE id=#{id}")
     String getFullAddressInfoByID(String id);
 
+    // 修改地址信息
     @Update("UPDATE address SET detailArea=#{detailArea},name=#{name},phoneNum=#{phoneNum} WHERE id=#{id} ")
     int updateAddressInfo(Address address);
 }

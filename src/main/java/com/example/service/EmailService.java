@@ -54,7 +54,7 @@ public class EmailService {
     }
 
     /*
-     * 激活账号邮件发送
+     * 下单邮件发送
      * @param email 收件人邮箱
      * */
     public void sendMailForBuy(String email){

@@ -21,11 +21,8 @@ public class UserService {
     private UserMapper userMapper;
     @Resource
     private EmailService emailService;
-    /*
-    * 注册账号
-    * @param user
-    * @return
-    */
+
+    // 注册账号
     @Transactional
     public Map<String, Object> createAccount(User user){
         // 雪花算法生成确认码

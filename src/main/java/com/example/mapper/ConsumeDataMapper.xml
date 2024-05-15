@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ConsumeDataMapper">
+    <delete id="deleteAllData">
+        DELETE FROM consumedata
+    </delete>
+    <insert id="insertListData">
+        INSERT INTO consumedata(userId, username, orderNum, totalPrice, avgPrice, kindMost) VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.userId}, #{item.username}, #{item.orderNum}, #{item.totalPrice}, #{item.avgPrice}, #{item.kindMost})
+        </foreach>
+    </insert>
+</mapper>

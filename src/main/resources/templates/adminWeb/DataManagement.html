@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <style>
+        html {
+            zoom: 0.9;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+            display: flex; /* 将页面内容改为弹性布局 */
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column; /* 将标题和用户信息列为垂直方向 */
+            align-items: center; /* 居中对齐 */
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            margin-right: 20px; /* 为了使内容与导航栏有间距 */
+        }
+
+        #navigation {
+            display: inline-block;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            width: 200px; /* 设置导航栏宽度 */
+        }
+
+        #navigation a {
+            display: block; /* 将链接显示为块元素以占据整行 */
+            padding: 20px 0; /* 添加上下内边距 */
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            font-weight: bold;
+        }
+
+        #main-content {
+            flex: 1; /* 让主要内容占据剩余空间 */
+            margin-top: 20px;
+        }
+
+        .ui.button {
+            background-color: #2185d0;
+            color: white;
+        }
+    </style>
+    <title>HG电商网</title>
+</head>
+
+<body>
+<div id="header">
+    <h1>HG —— 电商网</h1>
+    <h2>超级管理员管理后台</h2>
+    <div id="userInfo" style="display: none; align-items: center;">
+        <p id="userEmail" style="margin: 0; font-size: 1.2em;"></p>
+        <button class="ui button secondary" id="logoutButton" style="display: none;">注销</button>
+    </div>
+
+    <div style="height: 50px;"></div>
+
+    <div id="navigation">
+        <a href="#" onclick="loadContent('users')">用户账户信息管理</a>
+        <a href="#" onclick="loadContent('salesmen')">销售人员账户信息管理</a>
+        <a href="#" onclick="loadContent('logs')">系统运行日志管理</a>
+        <a href="#" onclick="loadContent('orders')">商城订单信息管理</a>
+        <a href="#" onclick="loadContent('goods')">商城商品信息管理</a>
+        <a href="#" onclick="loadContent('data')">用户画像分析</a>
+        <a href="#" onclick="loadContent('saleData')">商城商品销售额查询</a>
+    </div>
+
+</div>
+
+
+
+<!-- 主要内容区域 -->
+<div id="main-content">
+    <div>
+        <h2> 用户消费数据分析 </h2>
+    </div>
+    <div class="ui segment" id="contentArea">
+        <button class="ui button" onclick="userConsumeAnalyse()">用户消费数据分析更新</button>
+        <!-- 用户画像信息表格 -->
+        <table class="ui celled table" style="font-size: 1em">
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>用户ID</th>
+                <th>用户名</th>
+                <th>订单数</th>
+                <th>总消费金额</th>
+                <th>订单均价</th>
+                <th>最多购买类别</th>
+            </tr>
+            </thead>
+            <tbody id="dataTableBody">
+            <!-- 列表内容在此处动态展示 -->
+            </tbody>
+        </table>
+        <!-- 分页控件 -->
+        <div class="ui pagination menu" id="pagination">
+            <!--   分页按钮动态添加   -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+    // --------------------------------------------------------------------------
+    // 动态加载管理员信息
+    $.ajax({
+        url:"/admin/getInfo",
+        method: "POST",
+        success: function (user){
+            if(user){
+                // 用户已登录，更新用户信息部分
+                $("#userInfo").css("display", "flex");
+                $("#userInfo p").text(`${user.email}`);
+                $("#logoutButton").css("display", "block");
+            }else{
+                window.location.href = '/adminLogin'
+            }
+        }
+    });
+    // 注销按钮点击事件
+    $("#userInfo").on("click", "#logoutButton", function () {
+        $.ajax({
+            url:"/admin/logout",
+            method:"POST",
+            success: function (response){
+                alert(response.message);
+                window.location.href = '/shoppingWeb';
+            },
+            error: function(error){
+                console.error('退出登录失败', error);
+            }
+        });
+    });
+
+    // --------------------------------------------------------------------------
+    // 分页信息
+    var pageSize = 6;
+    var currentPage = 1;
+    var datas = [];
+    // 加载数据库中数据信息
+    $.ajax({
+        url: '/data/getAllData',
+        method: 'GET',
+        success: function (data){
+            datas = data;
+            renderTable(currentPage);
+            renderPagination();
+        }
+    })
+    // 渲染表格数据
+    function renderTable(page){
+        var start = (page - 1) * pageSize;
+        var end = start + pageSize;
+        var tableBody = $('#dataTableBody');
+        tableBody.empty();
+
+        for(var i=start;i<end && i<datas.length;i++){
+            var data = datas[i];
+            tableBody.append(`
+                    <tr>
+                        <td>${data.id}</td>
+                        <td>${data.userId}</td>
+                        <td>${data.username}</td>
+                        <td>${data.orderNum}</td>
+                        <td>${data.totalPrice}</td>
+                        <td>${data.avgPrice}</td>
+                        <td>${data.kindMost}</td>
+                    </tr>
+                `)
+        }
+        $('#currentPage').text(page);
+    }
+    // 渲染分页按钮
+    function renderPagination(){
+        var totalPages = Math.ceil(datas.length / pageSize);
+        var pagination = $('#pagination');
+        pagination.empty();
+        if(totalPages<=1){
+            return;
+        }
+        // 添加上一页按钮
+        pagination.append('<a class="icon item" id="previousPage"><i class="left chevron icon"></i></a>');
+
+        // 添加第一页按钮
+        pagination.append('<a class="item">1</a>');
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage>3) {
+            pagination.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加中间页码按钮
+        for (var i = 2; i < totalPages; i++) {
+            // 只显示当前页的前后两页，以及第一页和最后一页
+            if (Math.abs(i - currentPage) <= 1 || i === 1 || i === totalPages) {
+                pagination.append('<a class="item">' + i + '</a>');
+            }
+        }
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage<totalPages-2) {
+            pagination.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加最后一页按钮
+        pagination.append('<a class="item">' + totalPages + '</a>');
+
+        // 添加下一页按钮
+        pagination.append('<a class="icon item" id="nextPage"><i class="right chevron icon"></i></a>');
+
+        // 绑定分页按钮点击事件
+        $('#pagination .item').not('#previousPage, #nextPage, #ellipsis').click(function() {
+            currentPage = parseInt($(this).text());
+            renderTable(currentPage);
+            renderPagination();
+        });
+
+        // 上一页按钮点击事件
+        $('#previousPage').click(function (){
+            if(currentPage>1){
+                currentPage --;
+                renderTable(currentPage);
+                renderPagination();
+            }
+        })
+        // 下一页按钮点击事件
+        $('#nextPage').click(function (){
+            if(currentPage<Math.ceil(datas.length / pageSize)){
+                currentPage ++;
+                renderTable(currentPage);
+                renderPagination();
+            }
+        })
+    }
+    // --------------------------------------------------------------------------
+    // 页面跳转
+    function loadContent(section) {
+        if (section === 'users') {
+            window.location.href = '/adminWeb/UsersManagement'
+        }else if(section ==='salesmen'){
+            window.location.href = '/adminWeb/SalesmenManagement'
+        }else if(section ==='logs'){
+            window.location.href = '/adminWeb/LogsManagement'
+        }else if(section === 'orders'){
+            window.location.href = '/adminWeb/OrdersManagement'
+        }else if(section === 'goods'){
+            window.location.href = '/adminWeb/GoodsManagement'
+        }else if(section === 'data'){
+            window.location.href = '/adminWeb/DataManagement'
+        }else if(section === 'saleData'){
+            window.location.href = '/adminWeb/SaleDataManagement'
+        }
+
+    }
+
+    // --------------------------------------------------------------------------
+    // 用户消费数据分析
+    function userConsumeAnalyse(){
+        $.ajax({
+            url: "/data/analyseData",
+            method: "POST",
+            success: function (result){
+                alert(result.message);
+                // 加载数据库中数据信息
+                $.ajax({
+                    url: '/data/getAllData',
+                    method: 'GET',
+                    success: function (data){
+                        datas = data;
+                        renderTable(currentPage);
+                        renderPagination();
+                    }
+                })
+            },
+            error: function (){
+                console.error("分析错误");
+            }
+        })
+    }
+
+
+</script>
+
+</body>
+
+</html>

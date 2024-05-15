@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <style>
+        html {
+            zoom: 0.9;
+        }
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+            display: flex; /* 将页面内容改为弹性布局 */
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column; /* 将标题和用户信息列为垂直方向 */
+            align-items: center; /* 居中对齐 */
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            margin-right: 20px; /* 为了使内容与导航栏有间距 */
+        }
+
+        #navigation {
+            display: inline-block;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            width: 200px; /* 设置导航栏宽度 */
+        }
+
+        #navigation a {
+            display: block; /* 将链接显示为块元素以占据整行 */
+            padding: 20px 0; /* 添加上下内边距 */
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            font-weight: bold;
+        }
+
+        #main-content {
+            flex: 1; /* 让主要内容占据剩余空间 */
+            margin-top: 20px;
+        }
+
+
+
+        .ui.button{
+            background-color: #2185d0;
+            color: white;
+        }
+    </style>
+    <title>HG电商网</title>
+</head>
+
+<body>
+<div id="header">
+    <h1>HG —— 电商网</h1>
+    <h2>销售人员管理后台</h2>
+    <div id="userInfo" style="display: none; align-items: center;">
+        <p id="userEmail" style="margin: 0; font-size: 1.2em;"></p>
+        <button class="ui button secondary" id="logoutButton" style="display: none;">注销</button>
+    </div>
+
+    <div style="height: 50px;"></div>
+
+    <div id="navigation">
+        <a href="#" onclick="loadContent('goods')">商品信息管理</a>
+        <a href="#" onclick="loadContent('kinds')">商品类别管理</a>
+        <a href="#" onclick="loadContent('orders')">用户订单管理</a>
+        <a href="#" onclick="loadContent('data')">商品销售额管理 </a>
+    </div>
+
+</div>
+
+
+
+<!-- 主要内容区域 -->
+<div id="main-content">
+    <div>
+        <h2> 商品类别管理 </h2>
+    </div>
+    <div class="ui segment" id="contentArea">
+        <!-- 添加类别按钮 -->
+        <button class="ui button" onclick="showAddForm()">添加商品类别</button>
+
+        <!-- 商品类别信息表格 -->
+        <table class="ui celled table" style="font-size: 1em">
+            <thead>
+            <tr>
+                <th>类别</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="goodsTableBody">
+            <!-- 列表内容在此处动态展示 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 添加商品类别信息的模态框 -->
+<div class="ui modal" id="addModal">
+    <i class="close icon"></i>
+    <div class="header">
+        添加商品类别信息
+    </div>
+    <div class="content">
+        <!-- 添加信息的表单 -->
+        <form id="addForm" class="ui form">
+            <div class="field">
+                <label>类别</label>
+                <input type="text" name="kind" placeholder="分类名" id="kindInputToAdd">
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <div class="ui primary button" onclick="addKindsInfo()">确认添加</div>
+        <div class="ui button" onclick="clearAddForm()">取消</div>
+    </div>
+</div>
+
+
+<!-- 删除商品类别信息确认模态框 -->
+<div class="ui basic modal" id="deleteModal">
+    <div class="ui icon header">
+        <i class="trash alternate outline icon"></i>
+        确认删除商品类别信息
+    </div>
+    <div class="content">
+        <p>你确定要删除该商品类别吗？该操作会导致该商品类别下的全部商品被删除！请谨慎操作！</p>
+    </div>
+    <div class="actions">
+        <div class="ui red basic cancel inverted button">
+            <i class="remove icon"></i>
+            取消
+        </div>
+        <div class="ui green ok inverted button">
+            <i class="checkmark icon"></i>
+            确认删除
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+
+    // 动态加载用户信息
+    $.ajax({
+        url:"/salesman/getInfo",
+        method: "POST",
+        success: function (user){
+            if(user){
+                // 用户已登录，更新用户信息部分
+                $("#userInfo").css("display", "flex");
+                $("#userInfo p").text(`${user.email}`);
+                $("#logoutButton").css("display", "block");
+            }else{
+                window.location.href = '/salesmanLogin'
+            }
+        }
+    });
+
+    // 注销按钮点击事件
+    $("#userInfo").on("click", "#logoutButton", function () {
+        $.ajax({
+            url:"/salesman/logout",
+            method:"POST",
+            success: function (response){
+                alert(response.message);
+                window.location.href = '/shoppingWeb';
+            },
+            error: function(error){
+                console.error('退出登录失败', error);
+            }
+        });
+    });
+
+    //--------------------------------------------------------------------------------
+    // 页面跳转
+    function loadContent(section) {
+        if (section === 'goods') {
+            window.location.href = '/salesmanWeb/goodsManagement'
+        }else if(section === 'kinds'){
+            window.location.href = '/salesmanWeb/kindsManagement'
+        }else if(section === 'orders'){
+            window.location.href = '/salesmanWeb/ordersManagement'
+        }else if(section === 'data'){
+            window.location.href = '/salesmanWeb/saleDataManagement'
+        }
+    }
+
+    // -------------------------------------------------------------------------------
+    // 分页信息
+    var pageSize = 10;
+    var currentPage = 1;
+    var kinds = [];
+    // 加载商品类别信息
+    $.ajax({
+        url: '/productKinds/kinds',
+        method: 'POST',
+        success: function(data) {
+            kinds = data;
+            renderTable(currentPage);
+            renderPagination();
+        },
+        error: function(error) {
+            console.error('Error fetching data:', error);
+        }
+    });
+    // 渲染表格数据
+    function renderTable(page){
+        var start = (page - 1) * pageSize;
+        var end = start + pageSize;
+        var tableBody = $('#goodsTableBody');
+        tableBody.empty();
+
+        for(var i=start;i<end && i<kinds.length;i++){
+            var kind = kinds[i];
+            tableBody.append(`
+                <tr>
+                    <td>${kind.productKind}</td>
+                    <td>
+                        <button class="ui button red" onclick="deleteKindsInfo(${kind.id})">删除</button>
+                    </td>
+                </tr>
+            `)
+        }
+        $('#currentPage').text(page);
+    }
+    // 渲染分页按钮
+    function renderPagination(){
+        var totalPages = Math.ceil(kinds.length / pageSize);
+        var pagination = $('#pagination');
+        pagination.empty();
+        if(totalPages<=1){
+            return;
+        }
+        // 添加上一页按钮
+        pagination.append('<a class="icon item" id="previousPage"><i class="left chevron icon"></i></a>');
+
+        // 添加第一页按钮
+        pagination.append('<a class="item">1</a>');
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage>3) {
+            pagination.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加中间页码按钮
+        for (var i = 2; i < totalPages; i++) {
+            // 只显示当前页的前后两页，以及第一页和最后一页
+            if (Math.abs(i - currentPage) <= 1 || i === 1 || i === totalPages) {
+                pagination.append('<a class="item">' + i + '</a>');
+            }
+        }
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage<totalPages-2) {
+            pagination.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加最后一页按钮
+        pagination.append('<a class="item">' + totalPages + '</a>');
+
+        // 添加下一页按钮
+        pagination.append('<a class="icon item" id="nextPage"><i class="right chevron icon"></i></a>');
+
+        // 绑定分页按钮点击事件
+        $('#pagination .item').not('#previousPage, #nextPage, #ellipsis').click(function() {
+            currentPage = parseInt($(this).text());
+            renderTable(currentPage);
+            renderPagination();
+        });
+
+        // 上一页按钮点击事件
+        $('#previousPage').click(function (){
+            if(currentPage>1){
+                currentPage --;
+                renderTable(currentPage);
+                renderPagination();
+            }
+        })
+        // 下一页按钮点击事件
+        $('#nextPage').click(function (){
+            if(currentPage<Math.ceil(kinds.length / pageSize)){
+                currentPage ++;
+                renderTable(currentPage);
+                renderPagination();
+            }
+        })
+    }
+    // -----------------------------------------------------------------------------
+
+    // 删除类别信息
+    function deleteKindsInfo(kindsId){
+        // 弹出确认删除的模态框
+        $('#deleteModal')
+            .modal({
+                closable: false,
+                onApprove: function () {
+                    // 用户点击确认删除时执行删除操作
+                    $.ajax({
+                        url: '/productKinds/Delete',
+                        method: 'POST',
+                        data: {
+                            id: kindsId
+                        },
+                        success: function (result) {
+                            // 删除成功，刷新
+                            alert(result.message);
+                            location.reload();
+                        },
+                        error: function (error) {
+                            console.error('Error deleting goods information:', error);
+                        }
+                    });
+                }
+            })
+            .modal('show');
+    }
+
+    //显示添加的表单
+    function showAddForm(){
+        $('#addModal').modal('show');
+    }
+
+    // 添加商品类别
+    function addKindsInfo() {
+        $.ajax({
+            url:"/productKinds/add",
+            method: "POST",
+            data:{
+                productKind: $("#kindInputToAdd").val()
+            },
+            success: function (result){
+                $('#addModal').modal('hide');
+                alert(result.message);
+                location.reload();
+            },
+            error: function (result){
+                alert(result.message);
+            }
+        })
+    }
+
+</script>
+
+</body>
+
+</html>

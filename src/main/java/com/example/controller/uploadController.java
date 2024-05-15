@@ -2,7 +2,9 @@ package com.example.controller;
 
 import com.example.pojo.Product;
 import com.example.service.GoodsService;
+import com.example.utils.MyLog;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +23,17 @@ public class uploadController {
     @Resource
     private GoodsService goodsService;
 
+    /**
+     * 添加商品的图片文件上传
+     * @param file 图片文件
+     * @param product 商品信息
+     * @param session 销售人员session
+     * @return 商品添加结果
+     * @throws IOException io异常
+     */
+    @MyLog(role = "销售人员", oper = "图片操作", operType = "上传", mess = "上传商品图片")
     @RequestMapping("imgStr")
-    public Map<String, Object> ImgStr(@RequestParam("file") MultipartFile file, Product product)throws IOException {
+    public Map<String, Object> ImgStr(@RequestParam("file") MultipartFile file, Product product, HttpSession session)throws IOException {
         Map<String, Object> resultMap = new HashMap<>();
         //简单验证一下file文件是否为空
         if (file.isEmpty()){
@@ -54,7 +65,7 @@ public class uploadController {
         //放入对应的字段中
         product.setImg(urlImg);
         //上传数据库
-        return goodsService.addGoodsInfo(product);
+        return goodsService.addGoodsInfo(product, session);
     }
 
 }

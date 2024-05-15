@@ -12,6 +12,7 @@ import java.io.Serializable;
 public class OrderItem implements Serializable {
     private Integer id;
     private Integer orderId;
+    private Integer productId;
     private String title;
     private Integer amount;
     private Double totalPrice;

@@ -22,7 +22,7 @@ public class EmailService {
     @Resource
     private TemplateEngine templateEngine;
 
-    /*
+    /**
     * 激活账号邮件发送
     * @param activationUrl 激活url连接
     * @param email 收件人邮箱
@@ -53,7 +53,7 @@ public class EmailService {
 
     }
 
-    /*
+    /**
      * 下单邮件发送
      * @param email 收件人邮箱
      * */

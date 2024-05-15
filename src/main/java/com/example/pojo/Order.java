@@ -13,7 +13,11 @@ import java.time.LocalDateTime;
 public class Order implements Serializable {
     private Integer id;
     private Integer userId;
+    private String salesmanName;
     private LocalDateTime orderTime;
     private Double totalPrice;
     private String address;
+    private String state;
+    private String expressNumber;
+
 }

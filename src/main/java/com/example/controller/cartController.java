@@ -18,25 +18,42 @@ public class cartController {
     @Resource
     private CartService cartService;
 
-    // 添加购物记录
+    /**
+     * 新增购物车记录
+     * @param cart 购物车信息
+     * @param session 用户session
+     * @return 添加结果
+     */
     @PostMapping("add")
     public Map<String,Object> addRecordToCart(Cart cart, HttpSession session){
         return cartService.addRecordToCart(cart, session);
     }
 
-    // 显示购物车信息
+    /**
+     * 根据用户获取购物车记录
+     * @param session 用户session
+     * @return 购物车记录列表
+     */
     @PostMapping("show")
     public List<detailCart> showRecordFromCart(HttpSession session){
         return cartService.showRecordFromCart(session);
     }
 
-    // 删除购物车记录
+    /**
+     * 根据购物车id删除记录
+     * @param cart 购物车id
+     * @return 删除结果
+     */
     @PostMapping("delete")
     public Map<String,Object> deleteRecordByID(Cart cart){
         return cartService.deleteRecordByID(cart);
     }
 
-    // 清空购物车
+    /**
+     * 根据用户id清空购物车
+     * @param session 用户session
+     * @return 清空结果
+     */
     @PostMapping("clear")
     public Map<String,Object> clearCart(HttpSession session){
         return cartService.clearCart(session);

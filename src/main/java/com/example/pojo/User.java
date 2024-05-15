@@ -18,4 +18,5 @@ public class User implements Serializable{
     private String confirmCode;  //确认码
     private LocalDateTime activationTime;  //有效期
     private Byte isValid;  //是否可用
+
 }

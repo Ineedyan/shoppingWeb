@@ -12,6 +12,8 @@ import java.io.Serializable;
 public class detailCart implements Serializable {
     private Integer id;
     private Integer productId;
+    private Integer kindId;
+    private String salesmanName;
     private String title;
     private String img;
     private Double finalPrice;

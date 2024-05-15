@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">shoppingweb
+    <style>
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        html {
+            zoom: 0.9;
+        }
+
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        .product-card {
+            width: 300px;
+            height: 450px;
+            margin: 20px;
+        }
+
+        .quantity-input {
+            width: 60px;
+        }
+
+        #userInfo {
+            display: none;
+        }
+
+        #navigation {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #navigation a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            width: 350px;
+            height: 40px;
+        }
+        .product-container{
+            display: flex;
+            width: 100%;
+        }
+        #recommend-container{
+            flex: 1;
+            margin-right: 20px;
+        }
+        #main-container{
+            flex: 4;
+        }
+        #pagination{
+            display: flex;
+            margin-top: 50px;
+            justify-content: center;
+        }
+
+    </style>
+    <title>HG电商网</title>
+</head>
+
+<body>
+    <div id="header">
+        <h1>HG —— 电商网</h1>
+        <div id="userInfo" style="display: none; align-items: center;">
+            <button class="ui button secondary" id="logoutButton" style="display: none;">注销</button>
+            <p id="userEmail" style="margin: 0; font-size: 1.2em;"></p>
+        </div>
+        <button class="ui button primary" id="loginButton">登录</button>
+    </div>
+
+    <div id="navigation">
+        <a href="#" onclick="loadContent('shoppingWeb')">商城首页</a>
+        <a href="#" onclick="loadContent('cart')">购物车</a>
+        <a href="#" onclick="loadContent('address')">收货地址填写</a>
+        <a href="#" onclick="loadContent('myOrder')">我的订单</a>
+    </div>
+
+<div class="container" >
+    <div class="ui action input search-bar">
+        <input type="text" placeholder="Search..." id="SearchInput">
+        <button class="ui button primary" onclick="searchProducts()">搜索</button>
+    </div>
+    <div class="product-container">
+        <div id="recommend-container">
+            <h3>>为您推荐<</h3>
+            <div id="recommend-content" class="ui cards">
+                <!-- 动态加载推荐商品 -->
+            </div>
+        </div>
+        <div id="main-container">
+            <h3>>商品区域<</h3>
+            <div id="main-content" class="ui cards">
+                <!--  动态加载商品  -->
+            </div>
+        </div>
+    </div>
+    <div class="ui pagination menu" id="pagination">
+        <!-- 分页导航 -->
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script>
+    // 动态加载用户信息
+    var isLogin = false;
+    var recommendProduct = [];
+    $.ajax({
+        url:"/user/getInfo",
+        method: "POST",
+        success: function (user){
+            if(user){
+                isLogin = true;
+                // 用户已登录，更新用户信息部分
+                $("#userInfo").css("display", "flex");
+                $("#userInfo p").text(`${user.email}`);
+                $("#loginButton").css("display", "none");
+                $("#logoutButton").css("display", "block");
+                // 推荐商品
+                getRecommendProduct();
+                recommendProducts();
+            }else{
+                // 用户未登录，显示登录按钮
+                $("#loginButton").css("display", "block");
+                $("#userInfo").css("display", "none");
+                $("#logoutButton").css("display", "none");
+            }
+        }
+    });
+
+    // 登录按钮点击事件
+    $("#loginButton").on("click", function () {
+        window.location.href = '/login';
+    });
+
+    // 注销按钮点击事件
+    $("#userInfo").on("click", "#logoutButton", function () {
+        $.ajax({
+            url:"user/logout",
+            method:"POST",
+            success: function (response){
+                isLogin = false;
+                alert(response.message);
+                window.location.href = '/shoppingWeb';
+            },
+            error: function(error){
+                console.error('Logout error', error);
+            }
+        });
+    });
+
+    // ------------------------------------------------------------------------------------
+    // 分页信息
+    var products = [];
+    // 从数据库加载产品
+    $.ajax({
+        url:"/goods/Goods",
+        method:"POST",
+        success: function (data){
+            products = data;
+            displayProducts(1, 2);
+        },
+        error:function (error){
+            console.error("获取产品时出错：", error);
+        }
+    });
+
+    // 将获取到的信息动态显示在页面上
+    function displayProducts(currentPage, linesPerPage){
+        // 绑定展示区域
+        const mainContent = $("#main-content");
+        mainContent.empty();
+        const totalPages = Math.ceil(products.length / (linesPerPage * 4));
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+
+        // 分页截取商品列表
+        const startIndex = (currentPage - 1) * linesPerPage * 4;
+        const endIndex = Math.min(products.length+1, startIndex + linesPerPage * 4);
+        const slicedProducts = products.slice(startIndex, endIndex);
+        // 每行最多四个商品
+        const productsPerRow = 4;
+        // 分割商品列表成为每行的数组
+        const rows = [];
+        for(let i=0;i<slicedProducts.length;i+=productsPerRow){
+            rows.push(slicedProducts.slice(i, i+productsPerRow));
+        }
+        // 遍历显示
+        rows.forEach(row => {
+            const rowContainer = $("<div class = 'ui cards'>");
+            row.forEach(product => {
+                rowContainer.append(`
+                    <div class="product-card card">
+                        <img src="${product.img}" alt="${product.title}" style="max-width: 100%; height: 300px;">
+                        <div class="content">
+                            <div class="header">${product.title}</div>
+                            <div class="meta"><del>${product.originalPrice}</del></div>
+                            <div class="meta">${product.finalPrice}</div>
+                            <div class="ui action input">
+                                <input type="number" class="quantity-input" value="1" min="1">
+                                <button class="ui button primary add-to-cart" data-product-id="${product.id}" onclick="addToCart(${product.id})">加入购物车</button>
+                            </div>
+                        </div>
+                    </div>
+                `)
+            })
+            mainContent.append(rowContainer)
+        });
+        // 显示分页导航
+        $('#currentPage').text(currentPage);
+
+        displayPagination(currentPage, totalPages);
+    }
+
+    // 显示分页导航
+    function displayPagination(currentPage, totalPages){
+        const paginationContainer = $('#pagination');
+        paginationContainer.empty();
+
+        if(totalPages<=1){
+            return;
+        }
+        // 添加上一页按钮
+        paginationContainer.append('<a class="icon item" id="previousPage"><i class="left chevron icon"></i></a>');
+
+        // 添加第一页按钮
+        paginationContainer.append('<a class="item">1</a>');
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage>3) {
+            paginationContainer.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加中间页码按钮
+        for (var i = 2; i < totalPages; i++) {
+            // 只显示当前页的前后两页，以及第一页和最后一页
+            if (Math.abs(i - currentPage) <= 1 || i === 1 || i === totalPages) {
+                paginationContainer.append('<a class="item">' + i + '</a>');
+            }
+        }
+
+        // 添加省略号按钮（如果总页数大于最大显示按钮数）
+        if (currentPage<totalPages-2) {
+            paginationContainer.append('<a class="disabled item" id="ellipsis">...</a>');
+        }
+
+        // 添加最后一页按钮
+        paginationContainer.append('<a class="item">' + totalPages + '</a>');
+
+        // 添加下一页按钮
+        paginationContainer.append('<a class="icon item" id="nextPage"><i class="right chevron icon"></i></a>');
+
+        // 绑定分页按钮点击事件
+        $('#pagination .item').not('#previousPage, #nextPage, #ellipsis').click(function() {
+            currentPage = parseInt($(this).text());
+            displayProducts(currentPage, 2);
+            if(isLogin === true){
+                getRecommendProduct();
+            }
+        });
+
+        // 上一页按钮点击事件
+        $('#previousPage').click(function (){
+            if(currentPage>1){
+                currentPage --;
+                displayProducts(currentPage, 2);
+                if(isLogin === true){
+                    getRecommendProduct();
+                }
+            }
+        })
+        // 下一页按钮点击事件
+        $('#nextPage').click(function (){
+            if(currentPage<totalPages) {
+                currentPage++;
+                displayProducts(currentPage, 2);
+                if(isLogin === true){
+                    getRecommendProduct()
+                }
+            }
+        })
+    }
+
+    // ------------------------------------------------------------------------------------
+    // 获取商品推荐（2个）
+    function getRecommendProduct(){
+        $.ajax({
+            url: "/goods/getRecommend",
+            method: 'POST',
+            success: function (data){
+                recommendProduct = data;
+                recommendProducts();
+            },
+            error:function (error){
+                console.error("获取产品时出错：", error);
+            }
+        })
+    }
+    // 推荐商品
+    function recommendProducts(){
+        // 绑定展示区域
+        const recommendContent = $("#recommend-content");
+        recommendContent.empty();
+        // 显示
+        recommendProduct.forEach(product => {
+            const rowContainer = $("<div class = 'ui cards'>");
+            rowContainer.append(`
+                <div class="product-card card">
+                    <img src="${product.img}" alt="${product.title}" style="max-width: 100%; height: 300px;"">
+                    <div class="content">
+                        <div class="header">${product.title}</div>
+                        <div class="meta"><del>${product.originalPrice}</del></div>
+                        <div class="meta">${product.finalPrice}</div>
+                        <div class="ui action input">
+                            <input type="number" class="quantity-input" value="1" min="1">
+                            <button class="ui button primary add-to-cart" data-product-id="${product.id}" onclick="addToCart(${product.id})">加入购物车</button>
+                        </div>
+                    </div>
+                </div>
+            `)
+            recommendContent.append(rowContainer)
+        });
+    }
+
+
+    // ------------------------------------------------------------------------------------
+    // 产品搜索功能
+    function searchProducts(){
+        const searchContent = $("#SearchInput").val();
+        // 根据搜索词执行搜索
+        if(!searchContent.trim()){
+            alert("搜索词不能为空！");
+            return;
+        }
+        $.ajax({
+            url:`goods/search?content=${searchContent}`,
+            method:"GET",
+            success: function (searchResult){
+                displayProducts(searchResult);
+            },
+            error: function (error){
+                console.error("搜索产品时出错：",error);
+            }
+        })
+    }
+
+    // 页面跳转
+    function loadContent(section) {
+        if (section === 'shoppingWeb') {
+            window.location.href = '/shoppingWeb';
+        }
+        else if (section === 'cart'){
+            window.location.href = '/cart'
+        }
+        else if (section === 'address'){
+            window.location.href = '/addressManagement'
+        }
+        else if (section === 'myOrder'){
+            window.location.href = '/myOrder'
+        }
+    }
+
+    // 添加购物车功能
+    function addToCart(productId){
+        // 通过 productId 获取相应的 DOM 元素
+        var quantityInput = $(".add-to-cart[data-product-id='" + productId + "']").closest(".content").find(".quantity-input");
+        // 获取数量值
+        var amount = quantityInput.val();
+        // 发送加入购物车请求至后端
+        $.ajax({
+            url:"cart/add",
+            method:"POST",
+            data:{
+                productID: productId,
+                amount: amount
+            },
+            resultType:'json',
+            success: function (result) {
+                alert(result.message);
+            },
+            error: function (error) {
+                console.error("加入购物车时出错：", error);
+            }
+        })
+    }
+
+</script>
+</body>
+
+</html>
